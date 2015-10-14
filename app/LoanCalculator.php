@@ -2,8 +2,12 @@
 
 namespace App;
 
+
 class LoanCalculator
 {
+
+    const RATE_MAX_PRECISION = 4;
+
 
     public $principal = null;
     public $rate = null;
@@ -13,15 +17,44 @@ class LoanCalculator
         'grandTotal' => 0,
     );
 
-    public function calculate($principal, $termLength, $termLengthType, $rate)
+    public  $rules = array(
+                                'principal' => 'required|numeric',
+                                'termLength' => '',
+                                'termLengthType' => '',
+                                'rate' => ''
+                            );
+
+
+    /**
+     * LoanCalculator constructor.
+     * @param $principal
+     * @param $termLength
+     * @param $termLengthType
+     * @param $rate
+     */
+    public function __construct($principal, $termLength, $termLengthType, $rate)
     {
-        // TODO: write logic here
 
-        $args = func_get_args();
-
-        if (count($args) < 4) {
-            throw new InvalidArgumentException("You must supply the principal, term length, term length type and interest rate.");
+        if (count(func_get_args()) < 4) {
+            throw new \InvalidArgumentException("You must supply the principal, term length, term length type and interest rate.");
         }
+
+        $this->principal = $principal;
+        $this->termLength = $termLength;
+        $this->termLengthType = $termLengthType;
+        $this->rate = $rate;
+    }
+
+    /**
+     * @param $principal
+     * @param $termLength
+     * @param $termLengthType
+     * @param $rate
+     * @return array
+     * @throws InvalidArgumentException
+     */
+    public function calculate()
+    {
 
         //The following formulas were taken from
         //http://mathforum.org/dr.math/faq/faq.interest.html
@@ -48,17 +81,19 @@ class LoanCalculator
         I = Mnq - P.
          */
 
+        $this->validate();
+
         $this->principal = $this->cleanNumber((string) ($this->principal), 2);
 
         $this->rate = $this->cleanNumber((string) ($this->rate), 4);
 
         $M = 0;
-        $P = $principal;
-        $i = $rate / 100;
-        $n = $termLength;
+        $P = $this->principal;
+        $i = $this->rate / 100;
+        $n = $this->termLength;
         $q = 12;
 
-        if ($termLengthType === "months") {
+        if ($this->termLengthType === "months") {
             $n = $n / 12;
             $q = 12;
         }
@@ -70,6 +105,13 @@ class LoanCalculator
         return $this->result;
     }
 
+    /**
+     * @param $M
+     * @param $P
+     * @param $n
+     * @param $q
+     * @return mixed
+     */
     private function calculateTotalInterest($M, $P, $n, $q)
     {
         //Total amount of interest paid is
@@ -83,6 +125,12 @@ class LoanCalculator
 
     }
 
+    /**
+     * @param $M
+     * @param $n
+     * @param $q
+     * @return mixed
+     */
     private function calculateGrandTotal($M, $n, $q)
     {
         //Total amount paid with interest
@@ -95,6 +143,11 @@ class LoanCalculator
 
     }
 
+    /**
+     * @param $val
+     * @param $digits
+     * @return mixed
+     */
     private function cleanNumber($val, $digits)
     {
 
@@ -117,6 +170,37 @@ class LoanCalculator
         }
 
         return $val;
+
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function validate()
+    {
+
+
+        if(!is_numeric($this->principal)){
+            throw new \Exception('You must supply a valid dollar amount for the principal.');
+        }
+
+        if(!is_numeric($this->termLength)){
+            throw new \Exception('You must supply a valid term length.');
+        }
+
+        if(!in_array($this->termLengthType, array('years','months'))){
+            throw new \Exception('You must supply a valid term length type.');
+        }
+
+        /*$data = array(
+            'principal' => $this->principal,
+            'termLength' => $this->termLength,
+            'termLengthType' => $this->termLengthType,
+            'rate' => $this->rate
+        );
+        */
+
+
 
     }
 
