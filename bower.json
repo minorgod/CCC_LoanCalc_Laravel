@@ -1,0 +1,21 @@
+{
+  "name": "Laravel LoanCalc",
+  "version": "1.0",
+  "homepage": "",
+  "authors": [
+    "Brett Brewer <brett@brettbrewer.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "vendor/bower_components"
+  ],
+  "dependencies": {
+    "bootstrap-sass-official": "~3.3"
+  },
+  "description": "A simple loan payment calculator."
+}

@@ -1,0 +1,73 @@
+
+
+/* IMPORTANT: This file should be compiled to css by running the "gulp" command from the project directory */
+
+
+/* FIRST: Set any vars that need to be overridden in the bootstrap SASS files. We must do this before importing the bootstrap SASS stuff. */
+$icon-font-path: "/fonts/";
+$btn-font-weight: 300;
+$font-family-sans-serif: "Open Sans", Helvetica, Arial, sans-serif;
+
+@import url(http://fonts.googleapis.com/css?family=Lato:700);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+
+
+/**
+* These lines import all the necessarry Twitter bootstrap styles from the vendor/bower_components folder whenever we run gulp.
+* I'm not using it since I've switched to serving this stuff from the cdn, but you can uncomment if you want to serve it with the
+* rest of your css
+*/
+@import "bootstrap";
+@import "bootstrap/theme";
+
+
+/**
+* Stupid IE 10 fixes
+*/
+@-webkit-viewport   { width: device-width; }
+@-moz-viewport      { width: device-width; }
+@-ms-viewport       { width: device-width; }
+@-o-viewport        { width: device-width; }
+@viewport           { width: device-width; }
+
+/**
+* Stupid Safari Fixes for print problem.
+*/
+@media print {
+  .container {
+	width: auto;
+  }
+}
+
+/**
+* All other custom CSS goes below here
+*/
+
+body { 
+    padding-top: 70px;
+}
+
+/**
+* These are the only 3 selectors where we need to override Bootstrap's default fonts.
+* There are more that need to be overridden if you are using the bootstrap theme.
+*/
+/*
+body, .tooltip, .popover{
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+}
+*/
+
+.panel-heading .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e114";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+
+.panel-heading .accordion-toggle.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+}
+
+/* another comment */
