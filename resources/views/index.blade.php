@@ -1,125 +1,137 @@
-
-
 @extends('layouts.master')
 
 @section('content')
 
-    <div class="jumbotron">
-        <div class="container">
+	<div class="jumbotron">
+		<div class="container-fluid">
+
+			<h2>Loan Calculator</h2>
+
+			<p>This is a simple loan calculator created with Laravel 5.1, Bootstrap 3, and jQuery.</p>
 
 
-            <h1>Welcome!</h1>
-            <p></p>
-            <p>This is a simple loan calculator created with Laravel 5.1, Bootstrap 3, and jQuery.</p>
+			<form name="calcForm" action="{!! URL::route('home') !!}" method="post" novalidate>
 
-        </div>
-    </div>
+				<fieldset>
+					<legend>Here's the legend</legend>
+					<div class="principal row">
 
-    <h2>Loan Calculator</h2>
+						<div class="col-xs-12 col-sm-6 col-md-5 col-lg-4">
 
-    <h1>Simple Fixed Interest Rate Calculator</h1>
+							<div class="form-group">
 
-<div class="container" ng-init="calculate()">
+								<div class="input-group" >
 
+									<span class="input-group-addon">
+										<label for="principal" class="control-label" style="padding:0;margin:1px 0 0 0;">Principal</label>
+									</span>
 
-  <form  name="calcForm" class="form-horizontal css-form" novalidate>
+									<div class="icon-addon addon-md"
+									     data-toggle="tooltip"
+									     data-trigger="hover"
+									     data-viewport=".jumbotron"
+									     data-placement="auto"
+									     title="Enter the principal amount for the loan to the nearest penny.">
+										<input id="principal" name="principal" type="text" class="form-control" aria-describedby="principal-dollar-sign" required="" value="{{ old('principal') }}" >
+										<label for="principal" class="glyphicon flaticon-dollar185" rel="tooltip" title="Principal"></label>
+									</div>
 
+								</div>
 
-
-
-    <div class="form-group row">
-
-
-
-      <div class="input-group">
-        <span class="input-group-addon">
-          <label for="principal" class="control-label" style="padding:0;margin:1px 0 0 0;">Principal</label>
-        </span>
-
-        <div class="icon-addon addon-md">
-        <input id="principal" type="text" ng-model="data.principal" value="{{data.principal}}" ng-change="calculate()" class="form-control" aria-describedby="principal-dollar-sign" required="" >
-         <label for="principal" class="glyphicon flaticon-dollar185" rel="tooltip" title="Principal"></label>
-      </div>
-
-      </div>
-
-      <div ng-show="calcForm.principal.$touched && calcForm.principal.$error.required">Please enter a principal amount.</div>
-    </div>
+							</div>
 
 
-    <div class="form-group row">
+							<div class="form-group form-inline">
 
-      <div class="input-group ">
+								<div class="row">
 
-        <span class="input-group-addon">
-          <label for="term-length" class="control-label" style="padding:0;margin:1px 0 0 0;">Term Length</label>
-        </span>
+									<div class="col-xs-6 col-lg-7" style="margin-right:0;padding-right:0;">
+										<div class="input-group"
+										     data-toggle="tooltip"
+										     data-trigger="hover"
+										     data-placement="auto"
+										     title="Enter the duration of the loan in years or months.">
+											<span class="input-group-addon">
+												<label for="term-length" class="control-label" style="padding:0;margin:1px 0 0 0;">Term Length</label>
+											</span>
+											<input id="term-length" name="termLength" type="text" class="form-control" style="min-width:4em;" value="{{ old('termLength') }}">
+										</div>
+									</div>
 
-        <input id="term-length" type="text" ng-model="data.termLength" value="{{data.termLength | number:0}" class="form-control" ng-change="calculate()" >
+									<div class="col-xs-6 col-lg-5 pull-left" style="margin:0;">
+										<div class="input-group pull-left col-xs-push-2 col-lg-push-0">
+											<label></label>
 
-        <span class="input-group-addon">
-          <input id="term-length-years" name="termLengthType" type="radio" value="years" aria-label="Years" ng-model="data.termLengthType" ng-change="calculate()">
-          <label for="term-length-years" >Years</label>
-          <input id="term-length-months" name="termLengthType" type="radio" value="months" aria-label="Months" ng-model="data.termLengthType" ng-change="calculate()" style="padding:0;margin:0 0 -3px 0;">
-          <label for="term-length-months" >Months</label>
-        </span>
-      </div>
-
-
-
-    </div>
-
-    <div class="form-group row">
-
+											{!! Form::select('termLengthType',array('years'=>'Years','months'=>'Months'), old('termLengthType'),array('class' => 'form-control','style'=>'width:7em;padding-left:0;pull-left;')) !!}
 
 
-      <div class="input-group">
-        <span class="input-group-addon">
-          <label for="rate" class="control-label" style="padding:0;">Interest Rate</label>
-        </span>
+										</div>
+									</div>
 
-        <div class="icon-addon addon-md addon-rt">
-          <input id="rate" type="text" ng-model="data.rate" value="{{data.rate | number:4}}" class="form-control flaticon-percentage16" aria-describedby="rate-percent-sign" ng-change="calculate()">
-          <label class="glyphicon addon-rt flaticon-percentage16" id="rate-percent-sign"  title="percent"></label>
-        </div>
-      </div>
+								</div>
 
-    </div>
+							</div>
 
 
-
-    <!--<button type="button" ng-click="calculate()">Calculate</button>-->
-
-  </form>
-
-  <div>
-    <h3>Monthly Payment:
-      <span ng-model="data.monthlyPayment">{{data.monthlyPayment | currency}}</span>
-    </h3>
-  </div>
-
-  <div>
-    <h3>Total Interest Paid:
-      <span ng-model="data.totalInterest">{{data.totalInterest | currency}}</span>
-    </h3>
-  </div>
-
-  <div>
-    <h3>Total Amount Paid:
-      <span ng-model="data.grandTotal">{{data.grandTotal | currency}}</span>
-    </h3>
-  </div>
+							<div class="form-group ">
 
 
-</div>
+								<div class="input-group"
+								     data-toggle="tooltip"
+								     data-trigger="hover"
+								     data-placement="auto"
+								     title="Enter the annual percentage rate up to 4 decimal places.">
+
+									<span class="input-group-addon">
+										<label for="rate" class="control-label" style="padding:0;margin:1px 0 0 0;">Interest Rate</label>
+									</span>
+
+									<div class="icon-addon addon-md addon-rt">
+										<input id="rate" name="rate" type="text" class="form-control flaticon-percentage16" aria-describedby="rate-percent-sign" value="{{ old('rate') }}">
+										<label class="glyphicon addon-rt flaticon-percentage16" id="rate-percent-sign" title="percent" ></label>
+									</div>
+								</div>
+
+							</div>
+
+							<button type="submit" class="btn btn-lg btn-success">Calculate</button>
 
 
+						</div>
+
+					</div>
+				</fieldset>
+
+				{!! csrf_field() !!}
+			</form>
+
+		</div>
+	</div>
 
 
+	@if(!empty($results))
 
+		<div>
+			<h3>Monthly Payment:
+				<span>{{$results['monthlyPayment']}}</span>
 
+			</h3>
+		</div>
 
+		<div>
+			<h3>Total Interest Paid:
+				<span>{{$results['totalInterest']}}</span>
 
+			</h3>
+		</div>
+
+		<div>
+			<h3>Total Amount Paid:
+				<span>{{$results['grandTotal']}}</span>
+			</h3>
+		</div>
+
+	@endif
 
 
 

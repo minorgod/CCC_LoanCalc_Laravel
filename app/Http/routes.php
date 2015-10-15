@@ -18,6 +18,13 @@ Route::get('/', array(
 
                         );
 
+Route::post('/', array(
+        'as'=>'home',
+        'uses' => 'IndexController@calculate'
+    )
+
+);
+
 Route::get('about', array(
                                         'as'=>'about',
                                         'uses' => 'IndexController@showAbout'

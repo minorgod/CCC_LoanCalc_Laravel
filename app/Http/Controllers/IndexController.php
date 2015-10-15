@@ -1,34 +1,51 @@
 <?php namespace App\Http\Controllers;
 
-//use App\Post as Post;
-//use App\Repositories\Posts\PostRepositoryInterface as Post;
+
+use App\Http\Requests\CalculateRequest;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
-class IndexController extends Controller {
-    
-    //protected $layout = 'layouts.master';
+use App\LoanCalculator;
+
+class IndexController extends Controller
+{
 
     /**
-     * Show the index page.
+     * Show the index page
+     * @return \Illuminate\View\View
      */
     public function showIndex()
     {
-        //get the 4 most recent posts to show for the latest posts section
-       //$posts = $post->getRecent(4);
-       //return view('index')->with('posts',$posts);
         return view('index');
     }
-    
-     public function showAbout(){
-        
-        //$this->layout->content = View::make('about');
+
+    public function calculate(CalculateRequest $request)
+    {
+
+        $calculator = new LoanCalculator($request->all());
+
+        $results = $calculator->calculate();
+
+        return view('index',compact('results'));
+    }
+
+    /**
+     * Show the About page
+     * @return \Illuminate\View\View
+     */
+    public function showAbout()
+    {
         return view('about');
     }
 
-	public function showBootstrapExamples(){
-		return view('bootstrap-examples');
-	}
+    /**
+     * Show the bootstrap example page
+     * @return \Illuminate\View\View
+     */
+    public function showBootstrapExamples()
+    {
+        return view('bootstrap-examples');
+    }
 
 }

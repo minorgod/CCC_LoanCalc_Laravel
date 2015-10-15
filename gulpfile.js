@@ -25,6 +25,7 @@ elixir(function(mix) {
         .copy(paths.bootstrap + 'fonts/bootstrap', 'public/fonts')
         .copy(paths.jquery + "jquery.js", "resources/assets/js/jquery.js")
         .copy(paths.bootstrap + "javascripts/bootstrap.js","resources/assets/js/bootstrap.js")
+	    .copy("resources/assets/fonts","public/fonts")
         ;
 
     //compile our sass into css and save to public/css/all.css

@@ -9,6 +9,8 @@ class LoanCalculator
     const RATE_MAX_PRECISION = 4;
 
 
+    protected $data = array();
+
     public $principal = null;
     public $rate = null;
     public $result = array(
@@ -17,32 +19,21 @@ class LoanCalculator
         'grandTotal' => 0,
     );
 
-    public  $rules = array(
-                                'principal' => 'required|numeric',
-                                'termLength' => '',
-                                'termLengthType' => '',
-                                'rate' => ''
-                            );
+    public $rules = array(
+        'principal' => 'required|numeric',
+        'termLength' => '',
+        'termLengthType' => '',
+        'rate' => ''
+    );
 
 
     /**
      * LoanCalculator constructor.
-     * @param $principal
-     * @param $termLength
-     * @param $termLengthType
-     * @param $rate
+     * @param Array $input
      */
-    public function __construct($principal, $termLength, $termLengthType, $rate)
+    public function __construct( $input = array('principal'=>0, 'termLength'=>0, 'termLengthType'=>0, 'rate'=>0) )
     {
-
-        if (count(func_get_args()) < 4) {
-            throw new \InvalidArgumentException("You must supply the principal, term length, term length type and interest rate.");
-        }
-
-        $this->principal = $principal;
-        $this->termLength = $termLength;
-        $this->termLengthType = $termLengthType;
-        $this->rate = $rate;
+        $this->setData($input);
     }
 
     /**
@@ -83,25 +74,26 @@ class LoanCalculator
 
         $this->validate();
 
-        $this->principal = $this->cleanNumber((string) ($this->principal), 2);
+        $principal = $this->cleanNumber((string)($this->data['principal']), 2);
 
-        $this->rate = $this->cleanNumber((string) ($this->rate), 4);
+        $rate = $this->cleanNumber((string)($this->data['rate']), 4);
 
         $M = 0;
-        $P = $this->principal;
-        $i = $this->rate / 100;
-        $n = $this->termLength;
+        $P = $principal;
+        $i = $rate / 100;
+        $n = $this->data['termLength'];
         $q = 12;
 
-        if ($this->termLengthType === "months") {
+        if ($this->data['termLengthType'] === "months") {
             $n = $n / 12;
             $q = 12;
         }
 
         $pow = -1 * $n * $q;
-        $this->result['monthlyPayment'] = $M = round(($P * $i) / ($q * (1 - pow(1 + ($i / $q), $pow))), 2);
-        $this->result['totalInterest'] = $this->calculateTotalInterest($M, $P, $n, $q);
-        $this->result['grandTotal'] = $this->calculateGrandTotal($M, $n, $q);
+        $this->result['monthlyPayment'] = round(($P * $i) / ($q * (1 - pow(1 + ($i / $q), $pow))), 2);
+        $this->result['totalInterest'] = $this->calculateTotalInterest($this->result['monthlyPayment'], $P, $n, $q);
+        $this->result['grandTotal'] = $this->calculateGrandTotal($this->result['monthlyPayment'], $n, $q);
+
         return $this->result;
     }
 
@@ -116,10 +108,10 @@ class LoanCalculator
     {
         //Total amount of interest paid is
         //I = Mnq - P
-        //var M = $scope.data.monthlyPayment;
-        //var P = $scope.data.principal;
-        //var n = $scope.data.termLength;
-        //var q = 12;
+        //var $M = monthlyPayment;
+        //var $P = principal;
+        //var $n = termLength;
+        //var $q = 12;
 
         return ($M * $n * $q) - $P;
 
@@ -135,9 +127,9 @@ class LoanCalculator
     {
         //Total amount paid with interest
         //T = Mnq
-        //var M = $scope.data.monthlyPayment;
-        //var n = $scope.data.termLength;
-        //var q = 12;
+        //var $M = monthlyPayment;
+        //var $n = termLength;
+        //var $q = 12;
 
         return ($M * $n * $q);
 
@@ -161,7 +153,7 @@ class LoanCalculator
         $numberParts = explode(".", $val);
         if (count($numberParts) > 2) {
             $error = "You have too many decimals!";
-            return float($numberParts[0]+"."+$numberParts[1]);
+            return float($numberParts[0] + "." + $numberParts[1]);
         }
 
         //if there's a decimal part and it's greater than zero, parseFloat it to the preferred precision.
@@ -173,23 +165,54 @@ class LoanCalculator
 
     }
 
+
     /**
+     * Set the data
+     * @param $data
+     */
+    public function setData($data)
+    {
+        $this->validate($data);
+        $this->data['principal'] = $data['principal'];
+        $this->data['termLength'] = $data['termLength'];
+        $this->data['termLengthType'] = $data['termLengthType'];
+        $this->data['rate'] = $data['rate'];
+    }
+
+    /**
+     * Get the data
+     * @return mixed
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * Validate the input data
      * @throws \Exception
      */
-    private function validate()
+    private function validate($data = null)
     {
 
+        if(empty($data)){
+            $data = $this->data;
+        }
 
-        if(!is_numeric($this->principal)){
+        if (empty($data['principal']) || !is_numeric($data['principal'])) {
             throw new \Exception('You must supply a valid dollar amount for the principal.');
         }
 
-        if(!is_numeric($this->termLength)){
+        if (empty($data['termLength']) || !is_numeric($data['termLength'])) {
             throw new \Exception('You must supply a valid term length.');
         }
 
-        if(!in_array($this->termLengthType, array('years','months'))){
+        if (empty($data['termLengthType']) || !in_array($data['termLengthType'], array('years', 'months'))) {
             throw new \Exception('You must supply a valid term length type.');
+        }
+
+        if (empty($data['rate']) || !is_numeric($data['rate'])) {
+            throw new \Exception('You must supply a valid APR.');
         }
 
         /*$data = array(
@@ -199,7 +222,6 @@ class LoanCalculator
             'rate' => $this->rate
         );
         */
-
 
 
     }

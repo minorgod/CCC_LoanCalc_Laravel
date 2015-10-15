@@ -38,11 +38,16 @@ if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
 	document.querySelector('head').appendChild(msViewportStyle)
 }
 
-/**
-* Stupid Android Stock Browser fix for select form control
-*/
+
 window.addEventListener('JQueryLoaded', function (e) {
 	$(function () {
+
+		//enable any tooltips
+		$('[data-toggle="tooltip"]').tooltip();
+
+		/**
+		 * Stupid Android Stock Browser fix for select form control
+		 */
 		var nua = navigator.userAgent
 		var isAndroid = (nua.indexOf('Mozilla/5.0') > -1 && nua.indexOf('Android ') > -1 && nua.indexOf('AppleWebKit') > -1 && nua.indexOf('Chrome') === -1)
 		if (isAndroid) {
@@ -50,3 +55,4 @@ window.addEventListener('JQueryLoaded', function (e) {
 		}
 	});
 });
+
