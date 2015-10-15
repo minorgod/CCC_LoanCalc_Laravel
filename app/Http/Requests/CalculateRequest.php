@@ -27,7 +27,7 @@ class CalculateRequest extends Request
             'principal' => "required|numeric",
             'termLength' => "required|numeric|integer",
             'termLengthType' => "required|alpha|in:years,months",
-            'rate' => "required|numeric",
+            'rate' => "required|numeric"
         ];
     }
 }

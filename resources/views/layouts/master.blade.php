@@ -49,7 +49,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="{{ URL::route('home') }}">BrettBrewer.com</a>
+              <a class="navbar-brand" href="{{ URL::route('home') }}">Loan Calculator</a>
             </div>
             <div class="navbar-collapse collapse">
               
@@ -68,7 +68,7 @@
                 
                 <ul class="nav navbar-nav navbar-right">
                 
-                 <li>
+
                 @if( Auth::user() ) 
                     <li class="dropdown ">
                       
@@ -86,9 +86,11 @@
                       </ul>
                    </li>
                 @else
-                    <a href="#">Log In</a>
+					<li>
+                        <a href="#">Log In</a>
+					</li>
                 @endif
-                </li>
+
                 
               </ul>
             </div><!--/.nav-collapse -->
@@ -148,15 +150,11 @@
         @yield('content')
             
     </div>
-   
-    
-   
+
     <div class="container-fluid" style='margin-top:3em;'>
         <div class="row" style='background:#ccc;'>
                 <ul class="nav nav-justified">
-                    <li><a href="/">© {{@date("Y")}} BrettBrewer.com</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Privacy</a></li>
+                    <li><a href="/">LoanCalculator by Brett Brewer, {{@date("Y")}} LoanCalculator</a></li>
                 </ul>
 
         </div>
@@ -168,7 +166,6 @@
     -->
 
     <script async src="{!! elixir('js/all.js') !!}"></script>
-
 
 
 </body>

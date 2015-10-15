@@ -3,27 +3,33 @@
 namespace App;
 
 
-class LoanCalculator
+class LoanCalculator extends Calculator implements LoanCalculatorInterface
 {
 
-    const RATE_MAX_PRECISION = 4;
+    //a couple of constants to be used in truncating and/or rounding digits.
+    const INTEREST_RATE_MAX_PRECISION = 4;
+    const CURRENCY_MAX_DECIMALS = 2;
 
-
+    //an array of input data
     protected $data = array();
 
-    public $principal = null;
-    public $rate = null;
+    //an array to hold any errors or warning messages
+    protected $errors = array();
+
     public $result = array(
         'monthlyPayment' => 0,
         'totalInterest' => 0,
         'grandTotal' => 0,
     );
 
+    /**
+     * @var array of validation rules suitable for use in Laravel's validation lib
+     */
     public $rules = array(
-        'principal' => 'required|numeric',
-        'termLength' => '',
-        'termLengthType' => '',
-        'rate' => ''
+        'principal' => "required|numeric",
+        'termLength' => "required|numeric|integer",
+        'termLengthType' => "required|alpha|in:years,months",
+        'rate' => "required|numeric"
     );
 
 
@@ -33,16 +39,13 @@ class LoanCalculator
      */
     public function __construct( $input = array('principal'=>0, 'termLength'=>0, 'termLengthType'=>0, 'rate'=>0) )
     {
+        parent::__construct();
+
         $this->setData($input);
     }
 
     /**
-     * @param $principal
-     * @param $termLength
-     * @param $termLengthType
-     * @param $rate
      * @return array
-     * @throws InvalidArgumentException
      */
     public function calculate()
     {
@@ -74,13 +77,12 @@ class LoanCalculator
 
         $this->validate();
 
-        $principal = $this->cleanNumber((string)($this->data['principal']), 2);
-
-        $rate = $this->cleanNumber((string)($this->data['rate']), 4);
+        $this->data['principal'] = $this->cleanNumber(($this->data['principal']), self::CURRENCY_MAX_DECIMALS, 'principal');
+        $this->data['rate'] = $this->cleanNumber(($this->data['rate']), self::INTEREST_RATE_MAX_PRECISION, 'rate');
 
         $M = 0;
-        $P = $principal;
-        $i = $rate / 100;
+        $P = $this->data['principal'];
+        $i = $this->data['rate'] / 100;
         $n = $this->data['termLength'];
         $q = 12;
 
@@ -93,6 +95,8 @@ class LoanCalculator
         $this->result['monthlyPayment'] = round(($P * $i) / ($q * (1 - pow(1 + ($i / $q), $pow))), 2);
         $this->result['totalInterest'] = $this->calculateTotalInterest($this->result['monthlyPayment'], $P, $n, $q);
         $this->result['grandTotal'] = $this->calculateGrandTotal($this->result['monthlyPayment'], $n, $q);
+
+        $this->result['errors'] = $this->getErrors();
 
         return $this->result;
     }
@@ -113,7 +117,7 @@ class LoanCalculator
         //var $n = termLength;
         //var $q = 12;
 
-        return ($M * $n * $q) - $P;
+        return round(($M * $n * $q) - $P,2);
 
     }
 
@@ -131,68 +135,64 @@ class LoanCalculator
         //var $n = termLength;
         //var $q = 12;
 
-        return ($M * $n * $q);
+        return round($M * $n * $q, 2);
 
     }
 
     /**
      * @param $val
-     * @param $digits
+     * @param $precision
+     * @param string $fieldname
      * @return mixed
+     * @internal param $digits
      */
-    private function cleanNumber($val, $digits)
+    private function cleanNumber($val, $precision, $fieldname='')
     {
 
-        //regex which will validate commas and decimals...
+        //cast it to a string so we can easily manipulate the format.
+        if(!is_string($val)){
+            $val = (string) $val;
+        }
+
+        //If we supplied a friendly name for the field we are cleaning, turn that into a string we can use in error messages.
+        $fieldstring = "";
+        if(!empty($fieldname)){
+            $fieldstring = " in the {$fieldname} field";
+
+        }
+
+        //regex which will (supposedly) validate commas and decimals...
         //^((\d+)|(\d{1,3})(\,\d{3}|)*)(\.\d{2}|)$
 
         //strip anything other than digits and decimal
-        $val = preg_replace("/[^\d.]/", "", $val);
+        $val = preg_replace('/[^\d.]/', '', $val);
 
         //split the number on decimal. If it has more than 2 parts, it's invalid.
         $numberParts = explode(".", $val);
         if (count($numberParts) > 2) {
-            $error = "You have too many decimals!";
-            return float($numberParts[0] + "." + $numberParts[1]);
+            $this->setError( "You have too many decimals{$fieldstring}! We have removed everything after the invalid decimal. Please double-check your input.", $fieldname);
+            $val = floatval($numberParts[0].".".$numberParts[1]);
         }
 
-        //if there's a decimal part and it's greater than zero, parseFloat it to the preferred precision.
-        if (count($numberParts) === 2 && strlen($numberParts[1]) > $digits) {
-            $error = "You can only specify up to {$digits} decimal places.";
+        //If there's a decimal part and it's greater than zero, truncate it to the preferred precision.
+        //and convert it to a float.
+        if (count($numberParts) === 2 && strlen($numberParts[1]) > $precision) {
+            $this->setError("You can only specify up to {$precision} decimal places{$fieldstring}. We have truncated the number to the proper precision. Please double check your input to be sure it is correct.", $fieldname);
+            //$result['value'] = floatval($numberParts[0].".".substr($numberParts[1],0,$precision));
+            //of course, we could have done this with sprintf too...
+            $format = "%.{$precision}f";
+            $val = floatval(sprintf($format, $val));
         }
 
         return $val;
-
     }
 
-
-    /**
-     * Set the data
-     * @param $data
-     */
-    public function setData($data)
-    {
-        $this->validate($data);
-        $this->data['principal'] = $data['principal'];
-        $this->data['termLength'] = $data['termLength'];
-        $this->data['termLengthType'] = $data['termLengthType'];
-        $this->data['rate'] = $data['rate'];
-    }
-
-    /**
-     * Get the data
-     * @return mixed
-     */
-    public function getData()
-    {
-        return $this->data;
-    }
 
     /**
      * Validate the input data
      * @throws \Exception
      */
-    private function validate($data = null)
+    public function validate($data = null)
     {
 
         if(empty($data)){
@@ -215,15 +215,8 @@ class LoanCalculator
             throw new \Exception('You must supply a valid APR.');
         }
 
-        /*$data = array(
-            'principal' => $this->principal,
-            'termLength' => $this->termLength,
-            'termLengthType' => $this->termLengthType,
-            'rate' => $this->rate
-        );
-        */
-
-
+        return $data;
     }
+
 
 }

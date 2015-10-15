@@ -7,18 +7,16 @@
 
 			<h2>Loan Calculator</h2>
 
-			<p>This is a simple loan calculator created with Laravel 5.1, Bootstrap 3, and jQuery.</p>
 
-
-			<form name="calcForm" action="{!! URL::route('home') !!}" method="post" novalidate>
+			<form name="calcForm" id="calcForm" action="{!! URL::route('home') !!}" method="post" novalidate>
 
 				<fieldset>
-					<legend>Here's the legend</legend>
+					<legend>This is a simple loan calculator created with Laravel 5.1, Bootstrap 3, and jQuery.</legend>
 					<div class="principal row">
 
 						<div class="col-xs-12 col-sm-6 col-md-5 col-lg-4">
 
-							<div class="form-group">
+							<div class="form-group  @if ($errors->has('principal')) has-error @endif">
 
 								<div class="input-group" >
 
@@ -33,7 +31,7 @@
 									     data-placement="auto"
 									     title="Enter the principal amount for the loan to the nearest penny.">
 										<input id="principal" name="principal" type="text" class="form-control" aria-describedby="principal-dollar-sign" required="" value="{{ old('principal') }}" >
-										<label for="principal" class="glyphicon flaticon-dollar185" rel="tooltip" title="Principal"></label>
+										<label for="principal" class="glyphicon flaticon-dollar185 " rel="tooltip" title="Principal" ></label>
 									</div>
 
 								</div>
@@ -41,7 +39,7 @@
 							</div>
 
 
-							<div class="form-group form-inline">
+							<div class="form-group form-inline @if ($errors->has('termLength')) has-error @endif">
 
 								<div class="row">
 
@@ -73,7 +71,7 @@
 							</div>
 
 
-							<div class="form-group ">
+							<div class="form-group @if ($errors->has('rate')) has-error @endif">
 
 
 								<div class="input-group"
@@ -83,11 +81,11 @@
 								     title="Enter the annual percentage rate up to 4 decimal places.">
 
 									<span class="input-group-addon">
-										<label for="rate" class="control-label" style="padding:0;margin:1px 0 0 0;">Interest Rate</label>
+										<label for="rate" class="control-label @if ($errors->has('rate')) has-error @endif" style="padding:0;margin:1px 0 0 0;">Interest Rate</label>
 									</span>
 
 									<div class="icon-addon addon-md addon-rt">
-										<input id="rate" name="rate" type="text" class="form-control flaticon-percentage16" aria-describedby="rate-percent-sign" value="{{ old('rate') }}">
+										<input id="rate" name="rate" type="text" class="form-control flaticon-percentage16 " aria-describedby="rate-percent-sign" value="{{ old('rate') }}">
 										<label class="glyphicon addon-rt flaticon-percentage16" id="rate-percent-sign" title="percent" ></label>
 									</div>
 								</div>
@@ -106,32 +104,35 @@
 			</form>
 
 		</div>
+
+		@if(!empty($results))
+
+			<div>
+				<h3>Monthly Payment:
+					<span>&dollar;{{ number_format($results['monthlyPayment'],2) }}</span>
+
+				</h3>
+			</div>
+
+			<div>
+				<h3>Total Interest Paid:
+					<span>&dollar;{{ number_format($results['totalInterest'],2) }}</span>
+
+				</h3>
+			</div>
+
+			<div>
+				<h3>Total Amount Paid:
+					<span>&dollar;{{ number_format($results['grandTotal'],2) }}</span>
+				</h3>
+			</div>
+
+		@endif
+
 	</div>
 
 
-	@if(!empty($results))
 
-		<div>
-			<h3>Monthly Payment:
-				<span>{{$results['monthlyPayment']}}</span>
-
-			</h3>
-		</div>
-
-		<div>
-			<h3>Total Interest Paid:
-				<span>{{$results['totalInterest']}}</span>
-
-			</h3>
-		</div>
-
-		<div>
-			<h3>Total Amount Paid:
-				<span>{{$results['grandTotal']}}</span>
-			</h3>
-		</div>
-
-	@endif
 
 
 
